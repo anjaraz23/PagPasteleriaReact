@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservas - Pastelería Artesanal</title>
+  <!-- Fuentes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- CSS tiquitito-->
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+  <!-- navbar bonito -->
+    <div id="header-container"></div>
+
+    <main>
+        <section id="reserva" class="section active">
+      <div class="section-header">
+        <h2>Reserva tu Experiencia</h2>
+        <p>Asegura un lugar en nuestro salón o encarga tu pedido personalizado</p>
+      </div>
+      <div class="split-container">
+        <div class="card-box">
+          <form id="form-reserva">
+            <div class="form-group">
+              <label for="res-nombre">Nombre completo</label>
+              <input type="text" id="res-nombre" placeholder="Ej. Camila Silva" required>
+            </div>
+            <div class="form-group">
+              <label for="res-tipo">Tipo de Reserva</label>
+              <select id="res-tipo">
+                <option value="mesa">Mesa en Salón Creamy</option>
+                <option value="evento">Pedido para Evento Especial</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="res-fecha">Fecha y Hora</label>
+                <input type="datetime-local" id="res-fecha" required>
+              </div>
+              <div class="form-group">
+                <label for="res-personas">Personas</label>
+                <input type="number" id="res-personas" min="1" max="12" value="2" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary full-width">Confirmar Reserva</button>
+          </form>
+        </div>
+        <div class="side-image">
+          <img id="res-imagen"src="images/iu/sitio1.avif" alt="Salón de la pastelería">
+        </div>
+      </div>
+    </section>
+
+    </main>
+    <div id="footer-container"></div>
+    <!-- Scripts JS diosito por favor acompañame -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="scripts/script.js"></script>
+    <script src="scripts/sesion-activa.js"></script>
+    <script src="scripts/carrito.js"></script>
+  </body>
+
+</html>
