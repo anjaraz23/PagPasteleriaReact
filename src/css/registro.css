@@ -1,0 +1,94 @@
+/*              --- REGISTRO ---               */
+
+.registro-container {
+
+    background-color: #ffffff;
+    border-radius: 15px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+
+/*
+  --purple-dark: #4a2840;      Morado ciruela para textos e íconos principales 
+  --purple-primary: #8a5a82;   Morado suave/medio 
+  --purple-light: #d6c7de;     Lavanda pastel 
+  --purple-soft: #f4eff7;      Blanco con tinte lavanda muy suave 
+  --accent-pink: #e8b4b8;       Rosa pastel complementario 
+  
+  --bg-body: #faf7f9;          Fondo general pastel muy claro 
+  --white: #ffffff;
+  --text-main: #332230;
+  --text-muted: #6b5b68;
+  --border: #e3d7e5;
+
+*/
+.registro-container label {
+    color: var(--purple-dark);
+    font-weight: bold;
+}
+
+.registro-container .form-control,
+.registro-container .form-select {
+    border: 1px solid var(--purple-light);
+}
+
+.registro-container .form-control:focus,
+.registro-container .form-select:focus {
+    border-color: #292814;
+    box-shadow: 0 0 0 0.2rem var(--purple-primary);
+}
+
+.registro-container .form-text {
+    font-size: 12px;
+    color: #61613b;
+}
+
+/* Validación */
+.registro-container .form-control.is-invalid,
+.registro-container .form-select.is-invalid {
+    border-color: #b02a37;
+}
+
+.registro-container .form-control.is-valid,
+.registro-container .form-select.is-valid {
+    border-color: #4c7a3f;
+}
+
+.registro-container .invalid-feedback {
+    display: none;
+    color: #b02a37;
+    font-size: 13px;
+}
+
+.registro-container .invalid-feedback.mostrar {
+    display: block;
+}
+
+/* Botones */
+.registro-botones {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-registro {
+    background: var(--purple-light);
+    color: var(--purple-dark) !important;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-registro:hover {
+    background: var(--purple-primary);
+    color: var(--white) !important;
+    transform: scale(1.05);
+}
+
+#mensaje-general .alert {
+    border-radius: 10px;
+}
