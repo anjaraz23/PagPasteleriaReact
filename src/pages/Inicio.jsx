@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import CarruselInicio from '../components/Carrusel.jsx'
 import '../css/inicio.css'
 
 const features = [
@@ -9,22 +10,9 @@ const features = [
 
 export default function Inicio() {
   return (
-    <section id="inicio" className="section active">
-      <div className="hero">
-        <div className="hero-content">
-          <span className="badge">Pastelería &amp; Repostería</span>
-          <h1>Dulzura suave en cada bocado</h1>
-          <p>
-            En Creamy creamos momentos especiales con recetas artesanales, ingredientes seleccionados y el toque justo de magia morada.
-          </p>
-          <div className="hero-btns">
-            <Link to="/productos" className="btn btn-primary non-link">Ver Productos</Link>
-            <Link to="/reservas" className="btn btn-secondary non-link2">Reservar Mesa</Link>
-          </div>
-        </div>
-        <div className="hero-image">
-          <img src="/images/comida/torta-chocolate.avif" alt="Pastel de Creamy" />
-        </div>
+    <section className="inicio">
+      <div className="mt-4">
+        <CarruselInicio />
       </div>
 
       <div className="features">

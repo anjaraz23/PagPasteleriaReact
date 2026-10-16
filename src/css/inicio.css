@@ -74,3 +74,22 @@
   padding-bottom: 1rem;
   border-radius: var(--radius);
 }
+
+/*parte del css del carrusel*/
+.carrusel-inicio {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.carrusel-inicio img {
+  height: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .carrusel-inicio img {
+    height: 260px;
+  }
+}

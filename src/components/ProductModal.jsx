@@ -15,7 +15,7 @@ export default function ProductoModal({ producto, onCerrar, onAgregar }) {
                 <img
                   src={producto.imagen}
                   alt={producto.alt}
-                  className="img-fluid rounded"
+                  className="img-fluid rounded modal-img"
                 />
               </div>
               <div className="col-md-6">
