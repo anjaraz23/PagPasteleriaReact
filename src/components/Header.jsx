@@ -2,11 +2,12 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { Dropdown } from 'react-bootstrap'
 import { useCarrito } from '../context/CarritoContext.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
+import '../css/inicio.css'
 
 const enlaces = [
   { to: '/', label: 'Inicio' },
   { to: '/productos', label: 'Productos' },
-  { to: '/reservas', label: 'Reservas' },
+  { to: '/reservas', label: 'Encargos' },
   { to: '/contacto', label: 'Contacto' }
 ]
 
@@ -60,9 +61,14 @@ export default function Header() {
                 </Dropdown.Menu>
               </Dropdown>
             ) : (
-              <Link className="btn-login" to="/login">
-                Ingresar
-              </Link>
+              <div className= "auth-botones">
+                <Link className="btn-login" to="/login">
+                  Ingresar
+                </Link>
+                <Link className='btn-registrarse' to="/registro">
+                  Registrarse
+                </Link>
+              </div>  
             )}
           </li>
         </ul>

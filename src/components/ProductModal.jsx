@@ -25,8 +25,8 @@ export default function ProductoModal({ producto, onCerrar, onAgregar }) {
                 <button
                   className="btn btn-primary full-width"
                   onClick={() => {
-                    onAgregar(producto)
                     onCerrar()
+                    onAgregar(producto)
                   }}
                 >
                   Añadir al carrito

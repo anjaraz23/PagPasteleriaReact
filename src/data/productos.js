@@ -274,7 +274,7 @@ const productos = [
   //  "precio": 4490,
   //  "imagen": "",
   //  "alt": "",
-  //  "categoria": "",s
+  //  "categoria": "",
   //  "tag": null
   //},
 

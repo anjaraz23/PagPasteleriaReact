@@ -2,13 +2,13 @@
 :root {
   /* Paleta de tonos Morados y pasteles relacionados */
   /*busque los colores en adobe por si acaso*/
-  --purple-dark: #4a2840;      /* Morado ciruela para textos e íconos principales */
-  --purple-primary: #8a5a82;   /* Morado suave/medio */
-  --purple-light: #d6c7de;     /* Lavanda pastel */
-  --purple-soft: #f4eff7;      /* Blanco con tinte lavanda muy suave */
-  --accent-pink: #e8b4b8;      /* Rosa pastel complementario */
+  --purple-dark: #2e1627;      /* Morado ciruela para textos e íconos principales */
+  --purple-primary: #b459a5;   /* Morado suave/medio */
+  --purple-light: #c853ff;     /* Lavanda pastel */
+  --purple-soft: #e5b9ff;      /* Blanco con tinte lavanda muy suave */
+  --accent-pink: #ffc0c5;      /* Rosa pastel complementario */
   /* Colores de fondo y texto */
-  --bg-body: #faf7f9;         /* Fondo general pastel muy claro */
+  --bg-body: #f5d2fd;         /* Fondo general pastel muy claro */
   --white: #ffffff;
   --text-main: #332230;
   --text-muted: #6b5b68;
@@ -45,7 +45,7 @@ header {
 }
 
 .nav-container {
-  max-width: 1100px;
+  max-width: none;
   margin: 0 auto;
   padding: 1rem 2rem;
   display: flex;
@@ -86,9 +86,9 @@ header {
 
 /* Secciones y Control de Visibilidad */
 main {
-  max-width: 1100px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 2rem 3%;
   min-height: 80vh;
 }
 
@@ -161,11 +161,25 @@ main {
 }
 
 .btn-login {
+  background: var(--purple-soft);
+  color: var(--purple-dark) !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 20px;
+  transition: all 0.2s !important;
+}
+
+.btn-registrarse {
   background: var(--purple-light);
   color: var(--purple-dark) !important;
   padding: 0.5rem 1.2rem;
   border-radius: 20px;
   transition: all 0.2s !important;
+}
+
+.auth-botones{
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .full-width {
@@ -458,5 +472,13 @@ footer {
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+  }
+  .carrusel-inicio img {
+  height: 100%;
+  aspect-ratio: 16/9;
+  /*evita que pase el 70% de la altura */
+  max-height: 70vh;
+  /*recorta lo que sobra sin deformar*/
+  object-fit: cover;
   }
 }

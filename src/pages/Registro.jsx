@@ -62,6 +62,7 @@ function Campo({ id, label, hint, error, valido, as: Tag = 'input', children, ..
 }
 
 export default function Registro() {
+ 
   const [v, setV] = useState(vacio)
   const [intentado, setIntentado] = useState(false)
   const { mostrarMensaje } = useMensaje()
