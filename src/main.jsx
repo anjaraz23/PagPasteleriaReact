@@ -8,6 +8,7 @@ import App from './App.jsx'
 import { MensajeProvider } from './context/MensajeContext.jsx'
 import { SesionProvider } from './context/SesionContext.jsx'
 import { CarritoProvider } from './context/CarritoContext.jsx'
+import { ProductosProvider } from './context/ProductosContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <MensajeProvider>
         <SesionProvider>
           <CarritoProvider>
-            <App />
+            <ProductosProvider>
+              <App />
+            </ProductosProvider>
           </CarritoProvider>
         </SesionProvider>
       </MensajeProvider>

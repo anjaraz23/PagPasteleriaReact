@@ -53,8 +53,18 @@ export default function Header() {
                   {inicial}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
+                  {usuario.rol === 'admin' && (
+                  <Dropdown.Item as={Link} to="/admin">
+                    Panel de administración
+                  </Dropdown.Item>
+                  )}
                   <Dropdown.ItemText>{usuario.nombre}</Dropdown.ItemText>
                   <Dropdown.Divider />
+                  {usuario.rol !== 'admin' && (
+                  <Dropdown.Item as={Link} to="/mis-compras">
+                  Mis compras
+                  </Dropdown.Item>
+                  )}
                   <Dropdown.Item as="button" type="button" onClick={salir}>
                     Cerrar sesión
                   </Dropdown.Item>

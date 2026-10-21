@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../context/SesionContext.jsx'
 import { useMensaje } from '../context/MensajeContext.jsx'
 import '../css/login.css'
+import { ADMIN } from '../data/admin.js'
 
 export default function Login() {
 
@@ -25,9 +26,17 @@ export default function Login() {
     if (Object.keys(nuevos).length > 0) {
       setAlerta('Completa todos los campos para continuar.')
       return
+      
+    }
+    if (correo === ADMIN.correo && password === ADMIN.password) {
+    iniciarSesion({ nombre: 'Administrador', correo: ADMIN.correo, rol: 'admin' })
+    setAlerta('')
+    navigate('/admin')
+    return
     }
 
     const usuarios = JSON.parse(localStorage.getItem('usuariosCreamy')) || []
+
     const encontrado = usuarios.find((u) => u.correo.toLowerCase() === correo && u.password === password)
 
     if (!encontrado) {

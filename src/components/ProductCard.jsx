@@ -10,16 +10,22 @@ export default function ProductCard({ producto, onAgregar, onVer }) {
 
 
       {producto.tag && <div className="product-tag">{producto.tag}</div>}
+      {producto.descuento > 0 && <div className="product-tag promo">-{producto.descuento}%</div>}
       <img src={producto.imagen} alt={producto.alt} />
       <div className="product-details">
         <h3>{producto.nombre}</h3>
         <div className="product-bottom">
-          <span className="price">{formatoCLP(producto.precio)}</span>
-          <button
-          className="btn btn-small btn-agregar" 
-          onClick={(e) =>{ e.stopPropagation(); 
-          onAgregar(producto)}}
-          >
+            <span className="price">
+            {producto.descuento > 0 && (
+            <span className="precio-antes">{formatoCLP(producto.precioOriginal)}</span>
+            )}
+            {formatoCLP(producto.precio)}
+            </span>
+            <button
+            className="btn btn-small btn-agregar" 
+            onClick={(e) =>{ e.stopPropagation(); 
+            onAgregar(producto)}}
+            >
             Añadir
           </button>
         </div>

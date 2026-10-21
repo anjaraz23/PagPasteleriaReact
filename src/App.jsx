@@ -6,6 +6,8 @@ import Reservas from './pages/Reservas.jsx'
 import Contacto from './pages/Contacto.jsx'
 import Login from './pages/Login.jsx'
 import Registro from './pages/Registro.jsx'
+import Admin from './pages/Admin.jsx'
+import MisCompras from './pages/MisCompras.jsx'
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/mis-compras" element={<MisCompras/>} />
       </Route>
     </Routes>
   )

@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import ProductCard from '../components/ProductCard.jsx'
 import ProductoModal from '../components/ProductModal.jsx'
-import productos from '../data/productos.js'
 import { useCarrito } from '../context/CarritoContext.jsx'
 import '../css/productos.css'
-
-const categorias = ['Todos', ...new Set(productos.map((p) => p.categoria))]
+import { useProductos } from '../context/ProductosContext.jsx'
 
 export default function Productos() {
 
   const [productoSeleccionado, setProductoSeleccionado] = useState(null)
   const [categoria, setCategoria] = useState('Todos')
+  const { productos } = useProductos()
+  const categorias = ['Todos', ...new Set(productos.map((p) => p.categoria))]
   const { agregar, setAbierto } = useCarrito()
 
   const visibles = 

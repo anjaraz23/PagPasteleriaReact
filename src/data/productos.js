@@ -6,7 +6,7 @@ const productos = [
     "nombre": "Torta de crema y frutilla",
     "descripcion": "Bizcocho suave de vainilla con capas de crema chantilly y frutillas frescas, ideal para quienes disfrutan los sabores clásicos.",
     "detalle": "Ingredientes: Harina de trigo, huevos, azúcar, leche, mantequilla, crema para batir, frutillas y esencia de vainilla.",
-    "precio": 1990,
+    "precio": 3490,
     "imagen": "/images/comida/pastel_frutilla.jpg",
     "alt": "pastel de frutilla",
     "categoria": "Tortas",

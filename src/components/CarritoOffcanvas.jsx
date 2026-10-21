@@ -1,8 +1,32 @@
 import { Offcanvas } from 'react-bootstrap'
 import { useCarrito, formatoCLP } from '../context/CarritoContext.jsx'
+import { useNavigate } from 'react-router-dom'
+import { useSesion } from '../context/SesionContext.jsx'
+import { useMensaje } from '../context/MensajeContext.jsx'
+import { registrarPedido } from '../utils/pedidos.js'
 
 export default function CarritoOffcanvas() {
   const { items, total, abierto, setAbierto, cambiarCantidad, quitar, vaciar } = useCarrito()
+
+  const { usuario } = useSesion()
+  const { mostrarMensaje } = useMensaje()
+  const navigate = useNavigate()
+
+  const comprar = () => {
+  if (items.length === 0) return
+
+  // Para comprar hay que haber iniciado sesión
+  if (!usuario) {
+    setAbierto(false)
+    mostrarMensaje('Inicia sesión para finalizar tu compra.', 'error', 'Atención', () => navigate('/login'))
+    return
+  }
+
+  registrarPedido(usuario, items, total)
+  vaciar()
+  setAbierto(false)
+  mostrarMensaje('¡Compra realizada con éxito! Puedes verla en "Mis compras".', 'success')
+  }
 
   return (
     <Offcanvas show={abierto} onHide={() => setAbierto(false)} placement="end" id="carritoOffcanvas">
@@ -46,8 +70,8 @@ export default function CarritoOffcanvas() {
             Vaciar carrito
           </button>
           <div>
-            <button type="button" className="btn full-width" disabled>
-              Comprar (EN PROGRESO)
+            <button type="button" className="btn btn-secondary full-width" disabled={items.length === 0} onClick={comprar}>
+            Finalizar compra
             </button>
           </div>
         </div>

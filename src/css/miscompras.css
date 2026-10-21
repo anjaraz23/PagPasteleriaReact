@@ -1,0 +1,83 @@
+.compras-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.compras-vacio {
+  text-align: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.compras-vacio a { text-decoration: none; }
+
+.pedido-card {
+  background: var(--white);
+  border: 1px solid var(--purple-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.5rem;
+}
+
+.pedido-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--purple-dark);
+}
+
+.pedido-cabecera span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.pedido-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pedido-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.pedido-item-info { flex: 1; min-width: 0; }
+
+.pedido-item-info h4 {
+  font-size: 0.95rem;
+  color: var(--purple-dark);
+}
+
+.pedido-item-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.pedido-subtotal {
+  font-weight: 600;
+  color: var(--purple-dark);
+  white-space: nowrap;
+}
+
+.pedido-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.8rem;
+  font-size: 1.1rem;
+  color: var(--purple-dark);
+}
