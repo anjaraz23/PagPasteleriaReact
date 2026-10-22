@@ -1,17 +1,29 @@
 import { useState } from 'react'
 import { useMensaje } from '../context/MensajeContext.jsx'
+import { validarContacto } from '../utils/validaciones.js'
 import '../css/contacto.css'
 
 const vacio = { nombre: '', email: '', mensaje: '' }
+const MAX_MENSAJE = 500
 
 export default function Contacto() {
   const [form, setForm] = useState(vacio)
+  const [errores, setErrores] = useState({})
   const { mostrarMensaje } = useMensaje()
 
-  const cambiar = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const cambiar = (e) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: value })
+    // al corregir un campo se le quita el error mientras escribe
+    if (errores[name]) setErrores({ ...errores, [name]: undefined })
+  }
 
   const enviar = (e) => {
     e.preventDefault()
+    const err = validarContacto(form)
+    setErrores(err)
+    if (Object.keys(err).length > 0) return
+
     setForm(vacio)
     mostrarMensaje('¡Mensaje enviado! Te responderemos muy pronto.', 'success')
   }
@@ -24,22 +36,57 @@ export default function Contacto() {
       </div>
       <div className="split-container">
         <div className="card-box">
-          <form onSubmit={enviar}>
+          <form onSubmit={enviar} noValidate>
             <div className="form-group">
               <label htmlFor="con-nombre">Nombre</label>
-              <input type="text" id="con-nombre" name="nombre" required placeholder="Tu nombre" value={form.nombre} onChange={cambiar} />
+              <input
+                type="text"
+                id="con-nombre"
+                name="nombre"
+                placeholder="Tu nombre"
+                value={form.nombre}
+                onChange={cambiar}
+                className={errores.nombre ? 'input-error' : ''}
+              />
+              {errores.nombre && <p className="campo-error">{errores.nombre}</p>}
             </div>
+
             <div className="form-group">
               <label htmlFor="con-email">Correo Electrónico</label>
-              <input type="email" id="con-email" name="email" required placeholder="hola@ejemplo.com" value={form.email} onChange={cambiar} />
+              <input
+                type="text"
+                inputMode="email"
+                id="con-email"
+                name="email"
+                placeholder="hola@ejemplo.com"
+                value={form.email}
+                onChange={cambiar}
+                className={errores.email ? 'input-error' : ''}
+              />
+              {errores.email && <p className="campo-error">{errores.email}</p>}
             </div>
+
             <div className="form-group">
               <label htmlFor="con-mensaje">Mensaje</label>
-              <textarea id="con-mensaje" name="mensaje" rows="4" placeholder="¿En qué te podemos ayudar?" required value={form.mensaje} onChange={cambiar} />
+              <textarea
+                id="con-mensaje"
+                name="mensaje"
+                rows="4"
+                placeholder="¿En qué te podemos ayudar?"
+                value={form.mensaje}
+                onChange={cambiar}
+                className={errores.mensaje ? 'input-error' : ''}
+              />
+              <div className="contacto-pie-campo">
+                {errores.mensaje ? <p className="campo-error">{errores.mensaje}</p> : <span />}
+                <span className="campo-ayuda">{form.mensaje.length}/{MAX_MENSAJE}</span>
+              </div>
             </div>
+
             <button type="submit" className="btn btn-primary full-width">Enviar Mensaje</button>
           </form>
         </div>
+
         <div className="info-stack">
           <div className="info-card">
             <h4>📍 Dónde encontrarnos</h4>

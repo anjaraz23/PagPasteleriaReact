@@ -20,3 +20,26 @@
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.card-box .form-group input.input-error,
+.card-box .form-group textarea.input-error {
+  border-color: #b02a37;
+}
+
+.card-box .campo-error {
+  font-size: 0.8rem;
+  color: #b02a37;
+  margin-top: 0.3rem;
+}
+
+.card-box .campo-ayuda {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+.contacto-pie-campo {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}

@@ -1,4 +1,3 @@
-/* ---------- Panel de administración ---------- */
 .admin-barra {
   display: flex;
   flex-wrap: wrap;
@@ -88,7 +87,7 @@
   color: #b02a37;
 }
 
-/* ---------- Promociones en las tarjetas de productos ---------- */
+/*  Promociones en las tarjetas de productos  */
 .precio-antes {
   text-decoration: line-through;
   color: var(--text-muted);
@@ -102,4 +101,42 @@
   right: 1rem;
   background: var(--purple-dark);
   color: var(--white);
+}
+
+/* Formulario pa crear nuevo producto */
+.form-producto {
+  margin-bottom: 1.5rem;
+}
+
+.form-producto-titulo {
+  color: var(--purple-dark);
+  font-size: 1.3rem;
+  margin-bottom: 1.2rem;
+}
+
+.form-producto .form-group input.input-error,
+.form-producto .form-group textarea.input-error {
+  border-color: #b02a37;
+}
+
+.form-producto .campo-error {
+  font-size: 0.8rem;
+  color: #b02a37;
+  margin-top: 0.3rem;
+}
+
+.form-producto textarea {
+  resize: vertical;
+}
+
+.form-producto-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-producto-exito {
+  color: #4c7a3f;
+  font-weight: 600;
 }
