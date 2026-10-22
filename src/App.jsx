@@ -9,6 +9,7 @@ import Registro from './pages/Registro.jsx'
 import Admin from './pages/Admin.jsx'
 import MisCompras from './pages/MisCompras.jsx'
 import Blog from './pages/Blog.jsx'
+import Checkout from './pages/Checkout.jsx'
 
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/admin" element={<Admin />} />
         <Route path="/mis-compras" element={<MisCompras/>} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/checkout" element={<Checkout />} />
       </Route>
     </Routes>
   )

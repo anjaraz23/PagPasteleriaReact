@@ -3,7 +3,6 @@ import { useCarrito, formatoCLP } from '../context/CarritoContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../context/SesionContext.jsx'
 import { useMensaje } from '../context/MensajeContext.jsx'
-import { registrarPedido } from '../utils/pedidos.js'
 
 export default function CarritoOffcanvas() {
   const { items, total, abierto, setAbierto, cambiarCantidad, quitar, vaciar } = useCarrito()
@@ -22,10 +21,9 @@ export default function CarritoOffcanvas() {
     return
   }
 
-  registrarPedido(usuario, items, total)
-  vaciar()
+  // El pago y el registro del pedido ocurren en la página de checkout
   setAbierto(false)
-  mostrarMensaje('¡Compra realizada con éxito! Puedes verla en "Mis compras".', 'success')
+  navigate('/checkout')
   }
 
   return (

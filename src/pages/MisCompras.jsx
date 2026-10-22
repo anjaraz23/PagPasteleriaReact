@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useSesion } from '../context/SesionContext.jsx'
 import { formatoCLP } from '../context/CarritoContext.jsx'
 import { pedidosDe } from '../utils/pedidos.js'
+import { describirEntrega, describirPago } from '../utils/pago.js'
 import '../css/miscompras.css'
 
 export default function MisCompras() {
@@ -42,6 +43,12 @@ export default function MisCompras() {
                   <span className="pedido-subtotal">{formatoCLP(i.precio * i.cantidad)}</span>
                 </div>
               ))}
+
+              {p.entrega && (
+                <p className="pedido-detalle">
+                  {describirEntrega(p.entrega)}. {describirPago(p.pago)}.
+                </p>
+              )}
 
               <footer className="pedido-total">
                 <span>Total</span>
