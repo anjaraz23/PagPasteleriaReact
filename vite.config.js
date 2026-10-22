@@ -2,10 +2,11 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
-  esbuild: {
-    jsxInject: `import React from 'react'`, // Inyecta la importación automáticamente durante los tests
-  },
+  plugins: [
+    react({
+      jsxRuntime: 'automatic', // Maneja JSX automáticamente sin inyectar imports duplicados
+    }),
+  ],
   test: {
     environment: 'jsdom',
     globals: true,
