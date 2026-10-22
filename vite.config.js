@@ -1,12 +1,14 @@
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  esbuild: {
+    jsxInject: `import React from 'react'`, // Inyecta la importación automáticamente durante los tests
+  },
   test: {
-    environment: 'jsdom', 
-    globals: true,       
-    setupFiles: './src/utils/setupTests.js', 
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/utils/setupTests.js',
   },
 })
