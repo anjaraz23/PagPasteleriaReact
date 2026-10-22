@@ -1,0 +1,29 @@
+/* Estilos de la pasarela de compra. Heredan colores de Bootstrap/tu tema. */
+.checkout-container { padding-top: 1.5rem; padding-bottom: 3rem; }
+
+.checkout-bloque { margin-bottom: 1.25rem; border: 0; }
+.checkout-bloque legend { float: none; width: auto; font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; padding: 0; }
+.checkout-bloque .form-check-label { display: flex; gap: 0.6rem; align-items: center; cursor: pointer; padding: 0.35rem 0; }
+.checkout-bloque .form-check { padding-left: 0; }
+.checkout-bloque .form-check-input { margin: 0; flex-shrink: 0; float: none; }
+.checkout-campos { margin-top: 1rem; }
+.checkout-nota { margin: 0.75rem 0 0; color: var(--bs-secondary-color, #6c757d); }
+
+.checkout-resumen h3 { font-size: 1.15rem; margin-bottom: 1rem; }
+@media (min-width: 992px) { .checkout-resumen { position: sticky; top: 1rem; } }
+
+.checkout-item { display: grid; grid-template-columns: 56px 1fr auto; gap: 0.75rem; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--bs-border-color, #dee2e6); }
+.checkout-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 0.5rem; }
+.checkout-item p { margin: 0; font-size: 0.85rem; color: var(--bs-secondary-color, #6c757d); }
+
+.checkout-linea { display: flex; justify-content: space-between; padding: 0.4rem 0; }
+.checkout-total { font-weight: 700; font-size: 1.15rem; border-top: 1px solid var(--bs-border-color, #dee2e6); margin-top: 0.4rem; padding-top: 0.75rem; }
+
+.checkout-exito { max-width: 520px; margin: 0 auto; text-align: center; }
+.checkout-exito dl { text-align: left; margin: 1.25rem 0; }
+.checkout-exito dt { font-weight: 600; margin-top: 0.6rem; }
+.checkout-exito dd { margin: 0; }
+.checkout-acciones { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+
+/* Línea extra en "Mis compras" */
+.pedido-detalle { margin: 0.5rem 0; font-size: 0.9rem; color: var(--bs-secondary-color, #6c757d); }

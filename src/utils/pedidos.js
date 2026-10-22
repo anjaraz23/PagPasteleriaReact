@@ -17,11 +17,13 @@ export function pedidosDe(correo) {
     .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
 }
 
-export function registrarPedido(usuario, items, total) {
+// extra (opcional): datos adicionales del pedido, por ejemplo { subtotal, envio, entrega, pago }
+export function registrarPedido(usuario, items, total, extra = {}) {
   const todos = leerPedidos()
   const numero = todos.filter((p) => mismoCorreo(p.correo, usuario.correo)).length + 1
 
   const pedido = {
+    ...extra,
     id: Date.now(),
     numero,
     correo: usuario.correo,
