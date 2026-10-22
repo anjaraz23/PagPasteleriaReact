@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useProductos } from '../context/ProductosContext.jsx'
 import { formatoCLP } from '../context/CarritoContext.jsx'
+import FormProducto from './FormProducto.jsx'
 import '../css/admin.css'
 
 export default function AdminPanel({ onSalir }) {
-  const { productos, actualizar, actualizarVarios, restablecer } = useProductos()
+  const { productos, actualizar, actualizarVarios, restablecer, agregarProducto, eliminarProducto } =
+    useProductos()
   const [busqueda, setBusqueda] = useState('')
   const [seleccion, setSeleccion] = useState([])
   const [porcentaje, setPorcentaje] = useState(10)
@@ -62,18 +64,26 @@ export default function AdminPanel({ onSalir }) {
     }
   }
 
-  const descargarExcel = async () => {
-  // Se carga la librería solo al pulsar el botón, así no pesa en el resto del sitio
-  const XLSX = await import('xlsx')
+  // Solo se pueden eliminar los productos creados desde aca, no los q estan ya creados
+  const borrar = (p) => {
+    if (window.confirm(`¿Eliminar "${p.nombre}" del catálogo?`)) {
+      eliminarProducto(p.id)
+      setSeleccion((s) => s.filter((x) => x !== p.id))
+    }
+  }
 
-  const filas = productos.map((p) => ({
-    ID: p.id,
-    Producto: p.nombre,
-    Categoría: p.categoria,
-    'Precio base': p.precioOriginal,
-    'Descuento (%)': p.descuento,
-    'Precio final': p.precio
-  }))
+  const descargarExcel = async () => {
+    // Se carga la librería solo al pulsar el botón, así no pesa en el resto del sitio
+    const XLSX = await import('xlsx')
+
+    const filas = productos.map((p) => ({
+      ID: p.id,
+      Producto: p.nombre,
+      Categoría: p.categoria,
+      'Precio base': p.precioOriginal,
+      'Descuento (%)': p.descuento,
+      'Precio final': p.precio
+    }))
 
     const hoja = XLSX.utils.json_to_sheet(filas)
     hoja['!cols'] = [{ wch: 6 }, { wch: 38 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 12 }]
@@ -83,8 +93,7 @@ export default function AdminPanel({ onSalir }) {
 
     const fecha = new Date().toLocaleDateString('en-CA')
     XLSX.writeFile(libro, `productos-creamy-${fecha}.xlsx`)
-    }
-
+  }
 
   const alPresionarEnter = (e) => {
     if (e.key === 'Enter') e.target.blur()
@@ -100,17 +109,19 @@ export default function AdminPanel({ onSalir }) {
           </p>
         </div>
         <div className="admin-acciones">
-            <button type="button" className="btn btn-small" onClick={descargarExcel}>
+          <button type="button" className="btn btn-small" onClick={descargarExcel}>
             Descargar Excel
-            </button>
-            <button type="button" className="btn btn-small btn-peligro" onClick={volverOriginal}>
-                Restablecer todo
-            </button>
-            <button type="button" className="btn btn-small" onClick={onSalir}>
-                Cerrar sesión admin
-            </button>
+          </button>
+          <button type="button" className="btn btn-small btn-peligro" onClick={volverOriginal}>
+            Restablecer todo
+          </button>
+          <button type="button" className="btn btn-small" onClick={onSalir}>
+            Cerrar sesión admin
+          </button>
         </div>
       </div>
+
+      <FormProducto productos={productos} onCrear={agregarProducto} />
 
       <div className="admin-promo">
         <strong>Promoción para los seleccionados ({seleccion.length}):</strong>
@@ -162,6 +173,11 @@ export default function AdminPanel({ onSalir }) {
                 <td>
                   {p.nombre}
                   <small>{p.categoria}</small>
+                  {p.personalizado && (
+                    <button type="button" className="btn btn-small btn-peligro" onClick={() => borrar(p)}>
+                      Eliminar
+                    </button>
+                  )}
                 </td>
                 <td>
                   <input
