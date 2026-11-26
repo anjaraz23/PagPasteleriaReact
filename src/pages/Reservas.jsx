@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import productos from '../data/productos.js'
-import { SABOR_BASE, configDe, rangoPersonas } from '../data/personalizacion.js'
+import { SABOR_BASE, IMAGEN_PISOS,configDe, rangoPersonas } from '../data/personalizacion.js'
 import { guardarEncargo, comprimirImagen } from '../utils/encargos.js'
 import { useMensaje } from '../context/MensajeContext.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
@@ -219,6 +219,17 @@ export default function Reservas() {
                     : `Esta torta se puede preparar hasta en ${config.maxPisos} pisos.`}
                 </p>
               </div>
+              {IMAGEN_PISOS[form.pisos] && (
+                <figure className="pisos-ref">
+                  <img
+                    key={form.pisos}
+                    src={IMAGEN_PISOS[form.pisos]}
+                    alt={`Referencia de una torta de ${plural(form.pisos, 'piso', 'pisos')}`}
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
+                  <figcaption>Referencia: {plural(form.pisos, 'piso', 'pisos')}</figcaption>
+                </figure>
+              )}
 
               <div className="form-group">
                 <label htmlFor="enc-personas">Para cuántas personas</label>

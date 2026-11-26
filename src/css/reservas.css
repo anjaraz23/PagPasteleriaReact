@@ -56,3 +56,23 @@
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+
+.pisos-ref {
+  margin: 0 0 1.2rem;
+  text-align: center;
+}
+
+.pisos-ref img {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.pisos-ref figcaption {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+}
