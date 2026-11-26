@@ -34,14 +34,16 @@ export default function Login() {
       const respuesta = await authService.login({ email: correo, password })
       iniciarSesion(respuesta)
 
-      const datosUsuario = respuesta?.usuario || respuesta
-      if (datosUsuario?.rol === 'admin') {
+      const datosUsuario = JSON.parse(sessionStorage.getItem('usuarioActivo') || '{}')
+      const rol = (datosUsuario.role || datosUsuario.rol || '').toLowerCase()
+
+      if (rol === 'admin') {
         navigate('/admin')
         return
       }
 
       mostrarMensaje(
-        `¡Sesión iniciada correctamente! Bienvenido a Creamy, ${datosUsuario?.nombre || correo}.`,
+        `¡Sesión iniciada correctamente! Bienvenido a Creamy, ${datosUsuario.nombre || correo}.`,
         'success',
         '',
         () => navigate('/')
