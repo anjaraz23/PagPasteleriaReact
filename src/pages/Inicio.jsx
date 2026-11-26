@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import CarruselInicio from '../components/Carrusel.jsx'
 import '../css/inicio.css'
+import Video from '../components/video.jsx'
 
 const features = [
   { img: '/images/iconos/apreton-de-manos (1).png', titulo: '100% Artesanal', texto: 'Hornear diariamente es nuestro compromiso con la frescura.'},
   { img: '/images/iconos/libro-de-recetas.png', titulo: 'Recetas Únicas', texto: 'Combinaciones exclusivas de sabores y presentación impecable.' },
   { img: '/images/iconos/vibras-positivas.png', titulo: 'Ambiente Acogedor', texto: 'El espacio perfecto para tus tardes de café y postres.' },
-  { img: '/images/iconos/tarta-de-queso.png', titulo: 'Sabores únicos', texto: 'Revisa nuestra carta de productos', to: '/productos'}
+  { img: '/images/iconos/tarta-de-queso.png', titulo: 'Sabores únicos', texto: 'Revisa nuestra carta de productos', to: '/productos'},
+
 ]
 
 export default function Inicio() {

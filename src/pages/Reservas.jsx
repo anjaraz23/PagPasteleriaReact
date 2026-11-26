@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import productos from '../data/productos.js'
+import { SABOR_BASE, configDe, rangoPersonas } from '../data/personalizacion.js'
+import { guardarEncargo, comprimirImagen } from '../utils/encargos.js'
 import { useMensaje } from '../context/MensajeContext.jsx'
+import { useSesion } from '../context/SesionContext.jsx'
 import '../css/reservas.css'
 
 const tortas = productos.filter((p) => p.categoria === 'Tortas')
 const DIAS_MINIMOS = 3
+const MAX_FOTO_MB = 5
 
-// Fecha local en formato AAAA-MM-DD (la que entiende <input type="date">)
 const aTexto = (f) => f.toLocaleDateString('en-CA')
 
 function fechaMinima() {
@@ -27,37 +30,103 @@ function listarIngredientes(detalle = '') {
     .map((i) => i.charAt(0).toUpperCase() + i.slice(1))
 }
 
-const vacio = {
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`
+
+const crearVacio = () => ({
   nombre: '',
   contacto: '',
   tortaId: String(tortas[0]?.id ?? ''),
+  pisos: 1,
+  sabor: SABOR_BASE,
+  personas: 8,
   quitar: [],
   otroQuitar: '',
-  personas: 8,
   fecha: '',
   personalizado: false,
-  diseno: ''
-}
+  diseno: '',
+  foto: ''
+})
 
 export default function Reservas() {
-  const [form, setForm] = useState(vacio)
+  const [form, setForm] = useState(crearVacio)
   const [errorFecha, setErrorFecha] = useState('')
+  const [errorFoto, setErrorFoto] = useState('')
+  const inputFoto = useRef(null)
   const { mostrarMensaje } = useMensaje()
+  const { usuario } = useSesion()
 
   const minima = fechaMinima()
   const torta = tortas.find((t) => String(t.id) === form.tortaId)
+  const config = configDe(torta?.id)
   const ingredientes = listarIngredientes(torta?.detalle)
+  const opcionesSabor = [SABOR_BASE, ...config.sabores]
+  const pisosPosibles = Array.from({ length: config.maxPisos }, (_, i) => i + 1)
+  const rango = rangoPersonas(form.pisos)
 
   const cambiar = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  // Al cambiar de torta se reinician los ingredientes marcados
-  const cambiarTorta = (e) => setForm({ ...form, tortaId: e.target.value, quitar: [] })
+  // Al cambiar de torta se reinician las opciones que dependen de su receta
+  const cambiarTorta = (e) =>
+    setForm((prev) => {
+      const r = rangoPersonas(1)
+      return {
+        ...prev,
+        tortaId: e.target.value,
+        pisos: 1,
+        personas: Math.min(Math.max(prev.personas, r.min), r.max),
+        sabor: SABOR_BASE,
+        quitar: []
+      }
+    })
+
+  // Al cambiar los pisos, las personas se ajustan al rango que admite ese tamaño
+  const cambiarPisos = (e) => {
+    const pisos = Number(e.target.value)
+    const r = rangoPersonas(pisos)
+    setForm((prev) => ({ ...prev, pisos, personas: Math.min(Math.max(prev.personas, r.min), r.max) }))
+  }
 
   const alternarIngrediente = (ing) =>
     setForm((prev) => ({
       ...prev,
       quitar: prev.quitar.includes(ing) ? prev.quitar.filter((i) => i !== ing) : [...prev.quitar, ing]
     }))
+
+  const alternarPersonalizado = (e) => {
+    const activo = e.target.checked
+    setErrorFoto('')
+    setForm((prev) => (activo ? { ...prev, personalizado: true } : { ...prev, personalizado: false, diseno: '', foto: '' }))
+  }
+
+  const elegirFoto = async (e) => {
+    const archivo = e.target.files?.[0]
+    if (!archivo) return
+
+    if (!archivo.type.startsWith('image/')) {
+      setErrorFoto('El archivo debe ser una imagen.')
+      e.target.value = ''
+      return
+    }
+    if (archivo.size > MAX_FOTO_MB * 1024 * 1024) {
+      setErrorFoto(`La imagen no puede superar los ${MAX_FOTO_MB} MB.`)
+      e.target.value = ''
+      return
+    }
+
+    try {
+      const foto = await comprimirImagen(archivo)
+      setErrorFoto('')
+      setForm((prev) => ({ ...prev, foto }))
+    } catch {
+      setErrorFoto('No pudimos leer la imagen. Prueba con otra.')
+      e.target.value = ''
+    }
+  }
+
+  const quitarFoto = () => {
+    setForm((prev) => ({ ...prev, foto: '' }))
+    if (inputFoto.current) inputFoto.current.value = ''
+  }
 
   const enviar = (e) => {
     e.preventDefault()
@@ -68,15 +137,41 @@ export default function Reservas() {
     }
     setErrorFecha('')
 
+    const otro = form.otroQuitar.trim()
+    const encargo = {
+      id: Date.now(),
+      creado: new Date().toISOString(),
+      correo: usuario?.correo ?? null,
+      nombre: form.nombre.trim(),
+      contacto: form.contacto.trim(),
+      torta: torta.nombre,
+      pisos: form.pisos,
+      personas: Number(form.personas),
+      sabor: form.sabor,
+      quitar: otro ? [...form.quitar, otro] : form.quitar,
+      fechaEntrega: form.fecha,
+      diseno: form.personalizado ? form.diseno.trim() : '',
+      foto: form.personalizado ? form.foto : ''
+    }
+
+    try {
+      guardarEncargo(encargo)
+    } catch {
+      mostrarMensaje(
+        'No pudimos guardar tu encargo porque el almacenamiento está lleno. Prueba con una foto más pequeña o sin foto.',
+        'error'
+      )
+      return
+    }
+
     const fechaLarga = new Date(`${form.fecha}T00:00`).toLocaleDateString('es-CL', {
       day: 'numeric',
       month: 'long'
     })
 
-    // Aquí podrías guardar el encargo (localStorage o un backend) usando "form"
-    setForm(vacio)
+    setForm(crearVacio())
     mostrarMensaje(
-      `¡Encargo recibido! ${torta.nombre} para ${form.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
+      `¡Encargo recibido! ${torta.nombre} de ${plural(encargo.pisos, 'piso', 'pisos')} (${encargo.sabor}) para ${encargo.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
       'success'
     )
   }
@@ -85,7 +180,7 @@ export default function Reservas() {
     <section id="reserva" className="section active">
       <div className="section-header">
         <h2>Encarga tu torta</h2>
-        <p>Elige una de nuestras tortas, cuéntanos cómo la quieres y la preparamos para ti</p>
+        <p>Elige una de nuestras tortas, personalízala y la preparamos para ti</p>
       </div>
 
       <div className="split-container">
@@ -110,6 +205,44 @@ export default function Reservas() {
               </select>
             </div>
 
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="enc-pisos">Pisos</label>
+                <select id="enc-pisos" value={form.pisos} onChange={cambiarPisos}>
+                  {pisosPosibles.map((n) => (
+                    <option key={n} value={n}>{plural(n, 'piso', 'pisos')}</option>
+                  ))}
+                </select>
+                <p className="campo-ayuda">
+                  {config.maxPisos === 1
+                    ? 'Esta torta se prepara en un solo piso.'
+                    : `Esta torta se puede preparar hasta en ${config.maxPisos} pisos.`}
+                </p>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="enc-personas">Para cuántas personas</label>
+                <input type="number" id="enc-personas" name="personas" min={rango.min} max={rango.max} required value={form.personas} onChange={cambiar} />
+                <p className="campo-ayuda">
+                  Con {plural(form.pisos, 'piso', 'pisos')}: de {rango.min} a {rango.max} personas.
+                </p>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="enc-sabor">Sabor</label>
+              <select id="enc-sabor" name="sabor" value={form.sabor} onChange={cambiar}>
+                {opcionesSabor.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <p className="campo-ayuda">
+                {config.sabores.length === 0
+                  ? 'Esta torta se prepara solo con su receta original.'
+                  : 'El sabor cambia el relleno o la cobertura; el bizcocho de la receta base se mantiene.'}
+              </p>
+            </div>
+
             <div className="form-group">
               <label>¿Quieres sacar algún ingrediente?</label>
               <div className="ingredientes-grid">
@@ -124,41 +257,48 @@ export default function Reservas() {
               <p className="campo-ayuda">Revisaremos contigo si se puede retirar sin afectar la receta.</p>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="enc-personas">Para cuántas personas</label>
-                <input type="number" id="enc-personas" name="personas" min="4" max="40" required value={form.personas} onChange={cambiar} />
-              </div>
-              <div className="form-group">
-                <label htmlFor="enc-fecha">¿Para qué día la necesitas?</label>
-                <input type="date" id="enc-fecha" name="fecha" min={minima} required value={form.fecha} onChange={cambiar} />
-                {errorFecha ? (
-                  <p className="campo-error">{errorFecha}</p>
-                ) : (
-                  <p className="campo-ayuda">Mínimo {DIAS_MINIMOS} días de anticipación.</p>
-                )}
-              </div>
+            <div className="form-group">
+              <label htmlFor="enc-fecha">¿Para qué día la necesitas?</label>
+              <input type="date" id="enc-fecha" name="fecha" min={minima} required value={form.fecha} onChange={cambiar} />
+              {errorFecha ? (
+                <p className="campo-error">{errorFecha}</p>
+              ) : (
+                <p className="campo-ayuda">Mínimo {DIAS_MINIMOS} días de anticipación.</p>
+              )}
             </div>
 
             <div className="form-group">
               <label className="check-linea">
-                <input
-                  type="checkbox"
-                  checked={form.personalizado}
-                  onChange={(e) => setForm({ ...form, personalizado: e.target.checked })}
-                />
+                <input type="checkbox" checked={form.personalizado} onChange={alternarPersonalizado} />
                 Quiero un diseño personalizado
               </label>
+
               {form.personalizado && (
-                <textarea
-                  name="diseno"
-                  rows="3"
-                  className="mt-2"
-                  placeholder="Cuéntanos cómo la imaginas: colores, mensaje, tema, decoración..."
-                  required
-                  value={form.diseno}
-                  onChange={cambiar}
-                />
+                <>
+                  <textarea
+                    name="diseno"
+                    rows="3"
+                    className="mt-2"
+                    placeholder="Cuéntanos cómo la imaginas: colores, mensaje, tema, decoración..."
+                    required
+                    value={form.diseno}
+                    onChange={cambiar}
+                  />
+
+                  <div className="foto-ref">
+                    <label htmlFor="enc-foto">Foto de referencia (opcional)</label>
+                    <input type="file" id="enc-foto" accept="image/*" ref={inputFoto} onChange={elegirFoto} />
+                    {errorFoto && <p className="campo-error">{errorFoto}</p>}
+                    {form.foto && (
+                      <div className="foto-previa">
+                        <img src={form.foto} alt="Referencia del diseño" />
+                        <button type="button" className="btn btn-small" onClick={quitarFoto}>
+                          Quitar foto
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
 

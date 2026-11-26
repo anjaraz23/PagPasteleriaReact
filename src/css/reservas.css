@@ -38,3 +38,21 @@
   max-height: 480px;
   max-width: 480px;
 }
+.foto-ref {
+  margin-top: 1rem;
+}
+
+.foto-previa {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+
+.foto-previa img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
