@@ -35,8 +35,8 @@
 .side-image img {
   width: 100%;
   height: auto;
-  max-height: 480px;
-  max-width: 480px;
+  max-height: 490px;
+  max-width: 490px;
 }
 .foto-ref {
   margin-top: 1rem;
@@ -75,4 +75,17 @@
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-top: 0.4rem;
+}
+#reserva .split-container {
+  grid-template-columns: 1.4fr 1fr;
+}
+#reserva .side-image {
+  position: sticky;
+  top: 6rem;          /* deja espacio para que no quede tapada por el menú fijo */
+}
+
+@media (max-width: 768px) {
+  #reserva .side-image {
+    position: static; /* en el celular la imagen queda debajo del formulario, sin seguir el scroll */
+  }
 }

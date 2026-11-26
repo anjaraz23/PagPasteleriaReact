@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import productos from '../data/productos.js'
-import { SABOR_BASE, IMAGEN_PISOS,configDe, rangoPersonas } from '../data/personalizacion.js'
+import { SABOR_BASE, IMAGEN_PISOS, configDe, rangoPersonas, aplicarSabor } from '../data/personalizacion.js'
 import { guardarEncargo, comprimirImagen } from '../utils/encargos.js'
 import { useMensaje } from '../context/MensajeContext.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
@@ -58,8 +58,9 @@ export default function Reservas() {
   const minima = fechaMinima()
   const torta = tortas.find((t) => String(t.id) === form.tortaId)
   const config = configDe(torta?.id)
-  const ingredientes = listarIngredientes(torta?.detalle)
-  const opcionesSabor = [SABOR_BASE, ...config.sabores]
+  const saborElegido = config.sabores.find((s) => s.nombre === form.sabor)
+  const ingredientes = aplicarSabor(listarIngredientes(torta?.detalle), saborElegido)
+  const opcionesSabor = [SABOR_BASE, ...config.sabores.map((s) => s.nombre)]
   const pisosPosibles = Array.from({ length: config.maxPisos }, (_, i) => i + 1)
   const rango = rangoPersonas(form.pisos)
 
@@ -85,6 +86,8 @@ export default function Reservas() {
     const r = rangoPersonas(pisos)
     setForm((prev) => ({ ...prev, pisos, personas: Math.min(Math.max(prev.personas, r.min), r.max) }))
   }
+  // Al cambiar el sabor cambian los ingredientes, así que se limpian los que estaban marcados para quitar
+  const cambiarSabor = (e) => setForm((prev) => ({ ...prev, sabor: e.target.value, quitar: [] }))
 
   const alternarIngrediente = (ing) =>
     setForm((prev) => ({
