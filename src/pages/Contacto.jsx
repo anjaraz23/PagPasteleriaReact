@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMensaje } from '../context/MensajeContext.jsx'
 import { validarContacto } from '../utils/validaciones.js'
+import { contenidoService } from '../services/creamyServices.js'
 import '../css/contacto.css'
 
 const vacio = { nombre: '', email: '', mensaje: '' }
@@ -9,23 +10,35 @@ const MAX_MENSAJE = 500
 export default function Contacto() {
   const [form, setForm] = useState(vacio)
   const [errores, setErrores] = useState({})
+  const [enviando, setEnviando] = useState(false)
   const { mostrarMensaje } = useMensaje()
 
   const cambiar = (e) => {
     const { name, value } = e.target
     setForm({ ...form, [name]: value })
-    // al corregir un campo se le quita el error mientras escribe
     if (errores[name]) setErrores({ ...errores, [name]: undefined })
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     const err = validarContacto(form)
     setErrores(err)
     if (Object.keys(err).length > 0) return
 
-    setForm(vacio)
-    mostrarMensaje('¡Mensaje enviado! Te responderemos muy pronto.', 'success')
+    try {
+      setEnviando(true)
+      await contenidoService.enviarContacto({
+        nombre: form.nombre.trim(),
+        email: form.email.trim(),
+        mensaje: form.mensaje.trim()
+      })
+      setForm(vacio)
+      mostrarMensaje('¡Mensaje enviado! Te responderemos muy pronto.', 'success')
+    } catch (error) {
+      mostrarMensaje(error.message || 'No se pudo enviar el mensaje.', 'danger')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -83,7 +96,9 @@ export default function Contacto() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary full-width">Enviar Mensaje</button>
+            <button type="submit" className="btn btn-primary full-width" disabled={enviando}>
+              {enviando ? 'Enviando...' : 'Enviar Mensaje'}
+            </button>
           </form>
         </div>
 

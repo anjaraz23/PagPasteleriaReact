@@ -1,12 +1,10 @@
-import { useState } from 'react'
-import productos from '../data/productos.js'
+import { useEffect, useState } from 'react'
+import { useProductos } from '../context/ProductosContext.jsx'
 import { useMensaje } from '../context/MensajeContext.jsx'
+import { compraService } from '../services/creamyServices.js'
 import '../css/reservas.css'
 
-const tortas = productos.filter((p) => p.categoria === 'Tortas')
 const DIAS_MINIMOS = 3
-
-// Fecha local en formato AAAA-MM-DD (la que entiende <input type="date">)
 const aTexto = (f) => f.toLocaleDateString('en-CA')
 
 function fechaMinima() {
@@ -15,7 +13,6 @@ function fechaMinima() {
   return aTexto(f)
 }
 
-// Convierte "Ingredientes: Harina, huevos y leche." en ['Harina', 'Huevos', 'Leche']
 function listarIngredientes(detalle = '') {
   return detalle
     .replace(/^Ingredientes:\s*/i, '')
@@ -30,7 +27,7 @@ function listarIngredientes(detalle = '') {
 const vacio = {
   nombre: '',
   contacto: '',
-  tortaId: String(tortas[0]?.id ?? ''),
+  tortaId: '',
   quitar: [],
   otroQuitar: '',
   personas: 8,
@@ -40,17 +37,25 @@ const vacio = {
 }
 
 export default function Reservas() {
+  const { productos } = useProductos()
+  const tortas = productos.filter((p) => p.categoria === 'Tortas')
+
   const [form, setForm] = useState(vacio)
   const [errorFecha, setErrorFecha] = useState('')
+  const [enviando, setEnviando] = useState(false)
   const { mostrarMensaje } = useMensaje()
 
+  useEffect(() => {
+    if (!form.tortaId && tortas.length > 0) {
+      setForm((prev) => ({ ...prev, tortaId: String(tortas[0].id) }))
+    }
+  }, [tortas, form.tortaId])
+
   const minima = fechaMinima()
-  const torta = tortas.find((t) => String(t.id) === form.tortaId)
+  const torta = tortas.find((t) => String(t.id) === form.tortaId) || tortas[0]
   const ingredientes = listarIngredientes(torta?.detalle)
 
   const cambiar = (e) => setForm({ ...form, [e.target.name]: e.target.value })
-
-  // Al cambiar de torta se reinician los ingredientes marcados
   const cambiarTorta = (e) => setForm({ ...form, tortaId: e.target.value, quitar: [] })
 
   const alternarIngrediente = (ing) =>
@@ -59,7 +64,7 @@ export default function Reservas() {
       quitar: prev.quitar.includes(ing) ? prev.quitar.filter((i) => i !== ing) : [...prev.quitar, ing]
     }))
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
 
     if (form.fecha < minima) {
@@ -73,12 +78,31 @@ export default function Reservas() {
       month: 'long'
     })
 
-    // Aquí podrías guardar el encargo (localStorage o un backend) usando "form"
-    setForm(vacio)
-    mostrarMensaje(
-      `¡Encargo recibido! ${torta.nombre} para ${form.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
-      'success'
-    )
+    const payload = {
+      nombreCliente: form.nombre.trim(),
+      contacto: form.contacto.trim(),
+      tortaId: Number(torta?.id),
+      tortaNombre: torta?.nombre,
+      ingredientesQuitar: [...form.quitar, ...(form.otroQuitar.trim() ? [form.otroQuitar.trim()] : [])],
+      personas: Number(form.personas),
+      fechaEntrega: form.fecha,
+      personalizado: form.personalizado,
+      diseno: form.personalizado ? form.diseno.trim() : ''
+    }
+
+    try {
+      setEnviando(true)
+      await compraService.crearEncargo(payload)
+      setForm({ ...vacio, tortaId: String(tortas[0]?.id ?? '') })
+      mostrarMensaje(
+        `¡Encargo recibido! ${torta?.nombre} para ${form.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
+        'success'
+      )
+    } catch (err) {
+      mostrarMensaje(err.message || 'Debes iniciar sesión para realizar un encargo.', 'danger')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -162,7 +186,9 @@ export default function Reservas() {
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary full-width">Confirmar encargo</button>
+            <button type="submit" className="btn btn-primary full-width" disabled={enviando}>
+              {enviando ? 'Enviando encargo...' : 'Confirmar encargo'}
+            </button>
           </form>
         </div>
 

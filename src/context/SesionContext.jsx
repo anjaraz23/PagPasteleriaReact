@@ -1,7 +1,5 @@
-import React from 'react'
-import { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 
-// Reemplaza a sesion-activa.js (sessionStorage -> usuarioActivo)
 const SesionContext = createContext(null)
 
 const leerUsuario = () => {
@@ -15,12 +13,18 @@ const leerUsuario = () => {
 export function SesionProvider({ children }) {
   const [usuario, setUsuario] = useState(leerUsuario)
 
-  const iniciarSesion = (u) => {
-    sessionStorage.setItem('usuarioActivo', JSON.stringify(u))
-    setUsuario(u)
+  // Acepta tanto token, usuario. Como token, nombre, email, rol 
+  const iniciarSesion = (respuestaAuth) => {
+    if (respuestaAuth?.token) {
+      sessionStorage.setItem('creamy_token', respuestaAuth.token)
+    }
+    const datosUsuario = respuestaAuth?.usuario || respuestaAuth
+    sessionStorage.setItem('usuarioActivo', JSON.stringify(datosUsuario))
+    setUsuario(datosUsuario)
   }
 
   const cerrarSesion = () => {
+    sessionStorage.removeItem('creamy_token')
     sessionStorage.removeItem('usuarioActivo')
     setUsuario(null)
   }

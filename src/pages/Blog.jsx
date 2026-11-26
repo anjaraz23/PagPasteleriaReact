@@ -1,16 +1,32 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Modal } from 'react-bootstrap'
-import blogs, { categorias } from '../data/blogs.js'
+import { contenidoService } from '../services/creamyServices.js'
 import { filtrarBlogs, formatoFecha } from '../utils/blogs.js'
 import '../css/blog.css'
 
 export default function Blog() {
+  const [blogs, setBlogs] = useState([])
   const [texto, setTexto] = useState('')
   const [categoria, setCategoria] = useState('Todas')
   const [post, setPost] = useState(null)
   const [mostrar, setMostrar] = useState(false)
 
-  const visibles = useMemo(() => filtrarBlogs(blogs, { texto, categoria }), [texto, categoria])
+  useEffect(() => {
+    contenidoService
+      .obtenerBlogs()
+      .then((lista) => setBlogs(Array.isArray(lista) ? lista : []))
+      .catch((err) => console.error('Error cargando blogs:', err))
+  }, [])
+
+  const categorias = useMemo(
+    () => [...new Set(blogs.map((b) => b.categoria).filter(Boolean))],
+    [blogs]
+  )
+
+  const visibles = useMemo(
+    () => filtrarBlogs(blogs, { texto, categoria }),
+    [blogs, texto, categoria]
+  )
 
   const abrir = (p) => {
     setPost(p)
@@ -105,7 +121,7 @@ export default function Blog() {
               <p className="blog-meta">
                 Por {post.autor}, {formatoFecha(post.fecha)}, {post.minutos} min de lectura
               </p>
-              {post.contenido.map((parrafo, i) => (
+              {(Array.isArray(post.contenido) ? post.contenido : [post.contenido]).map((parrafo, i) => (
                 <p key={i}>{parrafo}</p>
               ))}
             </Modal.Body>

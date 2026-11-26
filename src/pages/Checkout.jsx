@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useCarrito, formatoCLP } from '../context/CarritoContext.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
-import { registrarPedido } from '../utils/pedidos.js'
+import { compraService } from '../services/creamyServices.js'
 import {
   ENVIO_DESPACHO,
-  DEMORA_PAGO,
   formatearTarjeta,
   formatearVencimiento,
   soloDigitos,
@@ -52,23 +51,18 @@ export default function Checkout() {
   const [procesando, setProcesando] = useState(false)
   const [errorPago, setErrorPago] = useState('')
   const [pedido, setPedido] = useState(null)
-  const temporizador = useRef(null)
-
-  useEffect(() => () => clearTimeout(temporizador.current), [])
 
   const envio = entrega === 'despacho' ? ENVIO_DESPACHO : 0
   const totalFinal = total + envio
   const datos = { entrega, direccion, comuna, metodo, tarjeta }
   const errores = intentado ? validarCheckout(datos) : {}
 
-  // Protección de la página
   if (!usuario) return <Navigate to="/login" replace />
   if (pedido) return <PedidoExitoso pedido={pedido} />
   if (items.length === 0) return <Navigate to="/productos" replace />
 
   const cambiarEntrega = (valor) => {
     setEntrega(valor)
-    // "Pagar al retirar" no existe con despacho
     if (valor === 'despacho' && metodo === 'efectivo') setMetodo('tarjeta')
   }
 
@@ -82,37 +76,42 @@ export default function Checkout() {
     setTarjeta((prev) => ({ ...prev, [name]: formateado }))
   }
 
-  const confirmar = (e) => {
+  const confirmar = async (e) => {
     e.preventDefault()
     setIntentado(true)
     setErrorPago('')
     if (Object.keys(validarCheckout(datos)).length > 0) return
 
-    setProcesando(true)
-    // Simula la respuesta del banco. Con una pasarela real aquí iría la llamada al servidor.
-    temporizador.current = setTimeout(() => {
-      if (metodo === 'tarjeta' && tarjetaRechazada(tarjeta.numero)) {
-        setProcesando(false)
-        setErrorPago('El banco rechazó el pago. Revisa los datos o prueba con otra tarjeta.')
-        return
-      }
+    if (metodo === 'tarjeta' && tarjetaRechazada(tarjeta.numero)) {
+      setErrorPago('El banco rechazó el pago. Revisa los datos o prueba con otra tarjeta.')
+      return
+    }
 
-      const nuevo = registrarPedido(usuario, items, totalFinal, {
-        subtotal: total,
-        envio,
-        entrega: entrega === 'despacho'
-          ? { tipo: 'despacho', direccion: direccion.trim(), comuna: comuna.trim() }
-          : { tipo: 'retiro' },
-        // Nunca se guarda el número completo ni el CVV: solo el método y los últimos 4 dígitos
-        pago: metodo === 'tarjeta'
-          ? { metodo, ultimos4: soloDigitos(tarjeta.numero).slice(-4) }
-          : { metodo }
-      })
+    const payload = {
+      usuarioEmail: usuario.email || usuario.correo,
+      items,
+      subtotal: total,
+      envio,
+      total: totalFinal,
+      entrega: entrega === 'despacho'
+        ? { tipo: 'despacho', direccion: direccion.trim(), comuna: comuna.trim() }
+        : { tipo: 'retiro' },
+      pago: metodo === 'tarjeta'
+        ? { metodo, ultimos4: soloDigitos(tarjeta.numero).slice(-4) }
+        : { metodo }
+    }
+
+    try {
+      setProcesando(true)
+      const creado = await compraService.crearPedido(payload)
       vaciar()
       setTarjeta(tarjetaVacia)
+      setPedido({ ...payload, ...creado, numero: creado?.numero || creado?.id })
+    } catch (err) {
+      setErrorPago(err.message || 'Ocurrió un error al registrar tu compra.')
+    } finally {
       setProcesando(false)
-      setPedido(nuevo)
-    }, DEMORA_PAGO)
+    }
   }
 
   return (
