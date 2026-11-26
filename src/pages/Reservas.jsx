@@ -87,7 +87,8 @@ export default function Reservas() {
     setForm((prev) => ({ ...prev, pisos, personas: Math.min(Math.max(prev.personas, r.min), r.max) }))
   }
   // Al cambiar el sabor cambian los ingredientes, así que se limpian los que estaban marcados para quitar
-  const cambiarSabor = (e) => setForm((prev) => ({ ...prev, sabor: e.target.value, quitar: [] }))
+  const cambiarSabor = (e) => 
+    setForm((prev) => ({ ...prev, sabor: e.target.value, quitar: [] }))
 
   const alternarIngrediente = (ing) =>
     setForm((prev) => ({

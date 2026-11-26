@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import CarruselInicio from '../components/Carrusel.jsx'
 import '../css/inicio.css'
-import Video from '../components/video.jsx'
+import IntroCreamy from '../components/IntroCreamy.jsx'
 
 const features = [
   { img: '/images/iconos/apreton-de-manos (1).png', titulo: '100% Artesanal', texto: 'Hornear diariamente es nuestro compromiso con la frescura.'},
@@ -14,6 +14,7 @@ const features = [
 export default function Inicio() {
   return (
     <section className="inicio">
+      <IntroCreamy />
       <div className="mt-4">
         <CarruselInicio />
       </div>
