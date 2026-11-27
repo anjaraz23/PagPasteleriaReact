@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import regiones from '../data/regiones.js'
 import { validarRun, validarCorreo, validarPassword } from '../utils/validaciones.js'
 import { useMensaje } from '../context/MensajeContext.jsx'
+import { authService } from '../services/creamyServices.js'
 import '../css/registro.css'
 
 const vacio = {
@@ -62,9 +63,10 @@ function Campo({ id, label, hint, error, valido, as: Tag = 'input', children, ..
 }
 
 export default function Registro() {
- 
   const [v, setV] = useState(vacio)
   const [intentado, setIntentado] = useState(false)
+  const [cargando, setCargando] = useState(false)
+  const [errorApi, setErrorApi] = useState('')
   const { mostrarMensaje } = useMensaje()
   const navigate = useNavigate()
 
@@ -74,39 +76,43 @@ export default function Registro() {
 
   const cambiar = (e) => {
     const { name, value } = e.target
-    // al cambiar la región se reinicia la comuna
     setV((prev) => (name === 'region' ? { ...prev, region: value, comuna: '' } : { ...prev, [name]: value }))
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     setIntentado(true)
+    setErrorApi('')
     if (Object.keys(validar(v)).length > 0) return
 
-    // Sin backend: los usuarios se guardan en localStorage, como antes
     const nuevoUsuario = {
       run: v.run.trim(),
       nombre: v.nombre.trim(),
       apellidos: v.apellidos.trim(),
-      correo: v.correo.trim(),
+      email: v.correo.trim().toLowerCase(),
       password: v.password,
-      fechaNacimiento: v.fechaNacimiento,
+      fechaNacimiento: v.fechaNacimiento || null,
       region: regiones[v.region].nombre,
       comuna: v.comuna,
       direccion: v.direccion.trim()
     }
-    const usuarios = JSON.parse(localStorage.getItem('usuariosCreamy')) || []
-    usuarios.push(nuevoUsuario)
-    localStorage.setItem('usuariosCreamy', JSON.stringify(usuarios))
 
-    setV(vacio)
-    setIntentado(false)
-    mostrarMensaje(
-      '¡Registro exitoso! Ya puedes iniciar sesión con tu correo y contraseña.',
-      'success',
-      '',
-      () => navigate('/login')
-    )
+    try {
+      setCargando(true)
+      await authService.register(nuevoUsuario)
+      setV(vacio)
+      setIntentado(false)
+      mostrarMensaje(
+        '¡Registro exitoso! Ya puedes iniciar sesión con tu correo y contraseña.',
+        'success',
+        '',
+        () => navigate('/login')
+      )
+    } catch (err) {
+      setErrorApi(err.message || 'No se pudo completar el registro.')
+    } finally {
+      setCargando(false)
+    }
   }
 
   const err = (k) => ({ error: errores[k], valido: ok(k) })
@@ -153,10 +159,17 @@ export default function Registro() {
                   Revisa los campos marcados en rojo antes de continuar.
                 </div>
               )}
+              {errorApi && (
+                <div className="alert alert-danger" role="alert">
+                  {errorApi}
+                </div>
+              )}
             </div>
 
             <div className="registro-botones">
-              <button type="submit" className="btn-registro btn btn-primary full-width">Crear mi cuenta</button>
+              <button type="submit" className="btn-registro btn btn-primary full-width" disabled={cargando}>
+                {cargando ? 'Creando cuenta...' : 'Crear mi cuenta'}
+              </button>
             </div>
           </form>
         </div>

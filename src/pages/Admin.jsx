@@ -6,8 +6,9 @@ export default function Admin() {
   const { usuario, cerrarSesion } = useSesion()
   const navigate = useNavigate()
 
-  // Sin sesión va al login; con sesión de cliente, al inicio
-  if (usuario?.rol !== 'admin') {
+  const rol = (usuario?.role || usuario?.rol || '').toLowerCase()
+
+  if (rol !== 'admin') {
     return <Navigate to={usuario ? '/' : '/login'} replace />
   }
 

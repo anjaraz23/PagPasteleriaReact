@@ -1,15 +1,14 @@
-import { useRef, useState } from 'react'
-import productos from '../data/productos.js'
-import { SABOR_BASE, IMAGEN_PISOS, configDe, rangoPersonas, aplicarSabor } from '../data/personalizacion.js'
-import { guardarEncargo, comprimirImagen } from '../utils/encargos.js'
+import { useEffect, useRef, useState } from 'react'
+import { useProductos } from '../context/ProductosContext.jsx'
 import { useMensaje } from '../context/MensajeContext.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
+import { compraService } from '../services/creamyServices.js'
+import { SABOR_BASE, IMAGEN_PISOS, configDe, rangoPersonas, aplicarSabor } from '../data/personalizacion.js'
+import { comprimirImagen } from '../utils/encargos.js'
 import '../css/reservas.css'
 
-const tortas = productos.filter((p) => p.categoria === 'Tortas')
 const DIAS_MINIMOS = 3
 const MAX_FOTO_MB = 5
-
 const aTexto = (f) => f.toLocaleDateString('en-CA')
 
 function fechaMinima() {
@@ -18,7 +17,6 @@ function fechaMinima() {
   return aTexto(f)
 }
 
-// Convierte "Ingredientes: Harina, huevos y leche." en ['Harina', 'Huevos', 'Leche']
 function listarIngredientes(detalle = '') {
   return detalle
     .replace(/^Ingredientes:\s*/i, '')
@@ -32,10 +30,10 @@ function listarIngredientes(detalle = '') {
 
 const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`
 
-const crearVacio = () => ({
+const crearVacio = (tortaIdInicial = '') => ({
   nombre: '',
   contacto: '',
-  tortaId: String(tortas[0]?.id ?? ''),
+  tortaId: tortaIdInicial,
   pisos: 1,
   sabor: SABOR_BASE,
   personas: 8,
@@ -48,15 +46,25 @@ const crearVacio = () => ({
 })
 
 export default function Reservas() {
-  const [form, setForm] = useState(crearVacio)
+  const { productos } = useProductos()
+  const tortas = productos.filter((p) => p.categoria === 'Tortas')
+
+  const [form, setForm] = useState(() => crearVacio())
   const [errorFecha, setErrorFecha] = useState('')
   const [errorFoto, setErrorFoto] = useState('')
+  const [enviando, setEnviando] = useState(false)
   const inputFoto = useRef(null)
   const { mostrarMensaje } = useMensaje()
   const { usuario } = useSesion()
 
+  useEffect(() => {
+    if (!form.tortaId && tortas.length > 0) {
+      setForm((prev) => ({ ...prev, tortaId: String(tortas[0].id) }))
+    }
+  }, [tortas, form.tortaId])
+
   const minima = fechaMinima()
-  const torta = tortas.find((t) => String(t.id) === form.tortaId)
+  const torta = tortas.find((t) => String(t.id) === form.tortaId) || tortas[0]
   const config = configDe(torta?.id)
   const saborElegido = config.sabores.find((s) => s.nombre === form.sabor)
   const ingredientes = aplicarSabor(listarIngredientes(torta?.detalle), saborElegido)
@@ -66,7 +74,6 @@ export default function Reservas() {
 
   const cambiar = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  // Al cambiar de torta se reinician las opciones que dependen de su receta
   const cambiarTorta = (e) =>
     setForm((prev) => {
       const r = rangoPersonas(1)
@@ -80,14 +87,13 @@ export default function Reservas() {
       }
     })
 
-  // Al cambiar los pisos, las personas se ajustan al rango que admite ese tamaño
   const cambiarPisos = (e) => {
     const pisos = Number(e.target.value)
     const r = rangoPersonas(pisos)
     setForm((prev) => ({ ...prev, pisos, personas: Math.min(Math.max(prev.personas, r.min), r.max) }))
   }
-  // Al cambiar el sabor cambian los ingredientes, así que se limpian los que estaban marcados para quitar
-  const cambiarSabor = (e) => 
+
+  const cambiarSabor = (e) =>
     setForm((prev) => ({ ...prev, sabor: e.target.value, quitar: [] }))
 
   const alternarIngrediente = (ing) =>
@@ -132,7 +138,7 @@ export default function Reservas() {
     if (inputFoto.current) inputFoto.current.value = ''
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
 
     if (form.fecha < minima) {
@@ -141,43 +147,42 @@ export default function Reservas() {
     }
     setErrorFecha('')
 
-    const otro = form.otroQuitar.trim()
-    const encargo = {
-      id: Date.now(),
-      creado: new Date().toISOString(),
-      correo: usuario?.correo ?? null,
+    const fechaLarga = new Date(`${form.fecha}T00:00`).toLocaleDateString('es-CL', {
+      day: 'numeric',
+      month: 'long'
+    })
+
+    const listaQuitar = [...form.quitar, ...(form.otroQuitar.trim() ? [form.otroQuitar.trim()] : [])]
+
+    // Coincide 1:1 con los campos de com.creamy.compra.model.Encargo
+    const payload = {
+      correo: usuario?.correo ?? usuario?.email ?? null,
       nombre: form.nombre.trim(),
       contacto: form.contacto.trim(),
-      torta: torta.nombre,
-      pisos: form.pisos,
+      torta: torta?.nombre ?? '',
+      pisos: Number(form.pisos),
       personas: Number(form.personas),
       sabor: form.sabor,
-      quitar: otro ? [...form.quitar, otro] : form.quitar,
+      quitar: listaQuitar.length > 0 ? listaQuitar.join(', ') : '',
       fechaEntrega: form.fecha,
       diseno: form.personalizado ? form.diseno.trim() : '',
       foto: form.personalizado ? form.foto : ''
     }
 
     try {
-      guardarEncargo(encargo)
-    } catch {
+      setEnviando(true)
+      await compraService.crearEncargo(payload)
+      setForm(crearVacio(String(tortas[0]?.id ?? '')))
+      if (inputFoto.current) inputFoto.current.value = ''
       mostrarMensaje(
-        'No pudimos guardar tu encargo porque el almacenamiento está lleno. Prueba con una foto más pequeña o sin foto.',
-        'error'
+        `¡Encargo recibido! ${torta?.nombre} de ${plural(form.pisos, 'piso', 'pisos')} (${form.sabor}) para ${form.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
+        'success'
       )
-      return
+    } catch (err) {
+      mostrarMensaje(err.message || 'Debes iniciar sesión para realizar un encargo.', 'danger')
+    } finally {
+      setEnviando(false)
     }
-
-    const fechaLarga = new Date(`${form.fecha}T00:00`).toLocaleDateString('es-CL', {
-      day: 'numeric',
-      month: 'long'
-    })
-
-    setForm(crearVacio())
-    mostrarMensaje(
-      `¡Encargo recibido! ${torta.nombre} de ${plural(encargo.pisos, 'piso', 'pisos')} (${encargo.sabor}) para ${encargo.personas} personas, para el ${fechaLarga}. Te contactaremos para confirmar los detalles.`,
-      'success'
-    )
   }
 
   return (
@@ -246,7 +251,7 @@ export default function Reservas() {
 
             <div className="form-group">
               <label htmlFor="enc-sabor">Sabor</label>
-              <select id="enc-sabor" name="sabor" value={form.sabor} onChange={cambiar}>
+              <select id="enc-sabor" name="sabor" value={form.sabor} onChange={cambiarSabor}>
                 {opcionesSabor.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
@@ -317,7 +322,9 @@ export default function Reservas() {
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary full-width">Confirmar encargo</button>
+            <button type="submit" className="btn btn-primary full-width" disabled={enviando}>
+              {enviando ? 'Enviando encargo...' : 'Confirmar encargo'}
+            </button>
           </form>
         </div>
 
