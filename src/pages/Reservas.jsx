@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useProductos } from '../context/ProductosContext.jsx'
 import { useMensaje } from '../context/MensajeContext.jsx'
+import { useSesion } from '../context/SesionContext.jsx'
 import { compraService } from '../services/creamyServices.js'
 import { SABOR_BASE, IMAGEN_PISOS, configDe, rangoPersonas, aplicarSabor } from '../data/personalizacion.js'
 import { comprimirImagen } from '../utils/encargos.js'
@@ -54,6 +55,7 @@ export default function Reservas() {
   const [enviando, setEnviando] = useState(false)
   const inputFoto = useRef(null)
   const { mostrarMensaje } = useMensaje()
+  const { usuario } = useSesion()
 
   useEffect(() => {
     if (!form.tortaId && tortas.length > 0) {
@@ -72,7 +74,6 @@ export default function Reservas() {
 
   const cambiar = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  // Al cambiar de torta se reinician las opciones que dependen de su receta
   const cambiarTorta = (e) =>
     setForm((prev) => {
       const r = rangoPersonas(1)
@@ -86,14 +87,12 @@ export default function Reservas() {
       }
     })
 
-  // Al cambiar los pisos, las personas se ajustan al rango que admite ese tamaño
   const cambiarPisos = (e) => {
     const pisos = Number(e.target.value)
     const r = rangoPersonas(pisos)
     setForm((prev) => ({ ...prev, pisos, personas: Math.min(Math.max(prev.personas, r.min), r.max) }))
   }
 
-  // Al cambiar el sabor cambian los ingredientes, así que se limpian los que estaban marcados para quitar
   const cambiarSabor = (e) =>
     setForm((prev) => ({ ...prev, sabor: e.target.value, quitar: [] }))
 
@@ -153,24 +152,20 @@ export default function Reservas() {
       month: 'long'
     })
 
-    const detalleDiseno = [
-      `${plural(form.pisos, 'piso', 'pisos')}`,
-      `Sabor: ${form.sabor}`,
-      form.personalizado && form.diseno.trim() ? `Diseño: ${form.diseno.trim()}` : ''
-    ].filter(Boolean).join(' | ')
+    const listaQuitar = [...form.quitar, ...(form.otroQuitar.trim() ? [form.otroQuitar.trim()] : [])]
 
+    // Coincide 1:1 con los campos de com.creamy.compra.model.Encargo
     const payload = {
-      nombreCliente: form.nombre.trim(),
+      correo: usuario?.correo ?? usuario?.email ?? null,
+      nombre: form.nombre.trim(),
       contacto: form.contacto.trim(),
-      tortaId: Number(torta?.id),
-      tortaNombre: torta?.nombre,
-      pisos: form.pisos,
-      sabor: form.sabor,
-      ingredientesQuitar: [...form.quitar, ...(form.otroQuitar.trim() ? [form.otroQuitar.trim()] : [])],
+      torta: torta?.nombre ?? '',
+      pisos: Number(form.pisos),
       personas: Number(form.personas),
+      sabor: form.sabor,
+      quitar: listaQuitar.length > 0 ? listaQuitar.join(', ') : '',
       fechaEntrega: form.fecha,
-      personalizado: form.personalizado,
-      diseno: detalleDiseno,
+      diseno: form.personalizado ? form.diseno.trim() : '',
       foto: form.personalizado ? form.foto : ''
     }
 
